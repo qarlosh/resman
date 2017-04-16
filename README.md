@@ -1,0 +1,2 @@
+# resman
+Javascript Resource Manager
