@@ -1,4 +1,7 @@
-if (!window.resman) resman = {};
+var resman = require("./resman");
+var resman_utils = require("./resman-utils");
+
+var resman_storage = {};
 
 /*
 Storage
@@ -7,12 +10,12 @@ Es una clase base que indica cómo se almacena y obtiene un recurso. P. ej.
 guardar/cargar archivo, enviar a/descargar de webserver, insert/select de bbdd, etc...
 */
 
-resman.Storage = function(resourceManager, config) {
+resman_storage.Storage = function(resourceManager, config) {
 	this.resourceManager = resourceManager;
 	this.requiredResourceTypeAttrs = config && config.requiredResourceTypeAttrs || [];
 }
 
-resman.Storage.prototype._checkRequiredResourceTypeAttrs = function(resourceType) {
+resman_storage.Storage.prototype._checkRequiredResourceTypeAttrs = function(resourceType) {
 	/*
 	comprobar que el ResourceType contenga los attrs requeridos
 	*/
@@ -23,7 +26,7 @@ resman.Storage.prototype._checkRequiredResourceTypeAttrs = function(resourceType
 	}
 }
 
-resman.Storage.prototype.retrieve = function(res) {
+resman_storage.Storage.prototype.retrieve = function(res) {
 	/*
 		Devuelve promise Q
 	*/
@@ -34,7 +37,7 @@ resman.Storage.prototype.retrieve = function(res) {
 	return this.doRetrieve(res, resourceType);
 }
 
-resman.Storage.prototype.store = function(res, data) {
+resman_storage.Storage.prototype.store = function(res, data) {
 	/*
 		Devuelve promise Q
 	*/
@@ -45,12 +48,12 @@ resman.Storage.prototype.store = function(res, data) {
 	return this.doStore(res, resourceType, data);
 }
 
-resman.Storage.prototype.doRetrieve = function(res, resourceType) {
+resman_storage.Storage.prototype.doRetrieve = function(res, resourceType) {
 	//	Reimplementar en descendientes. Éste no hace nada.
 	throw "doRetrieve() not implemented"
 }
 
-resman.Storage.prototype.doStore = function(res, resourceType, data) {
+resman_storage.Storage.prototype.doStore = function(res, resourceType, data) {
 	//	Reimplementar en descendientes. Éste no hace nada.
 	throw "doStore() not implemented"
 }
@@ -62,21 +65,21 @@ BrowserLocalStorage
 Carga por ajax un archivo local, y al guardar descarga el archivo.
 */
 
-resman.BrowserLocalStorage = function(resourceManager, config) {
-	resman.Storage.call(this, resourceManager, config);	// INHERITED
+resman_storage.BrowserLocalStorage = function(resourceManager, config) {
+	resman_storage.Storage.call(this, resourceManager, config);	// INHERITED
 	this.requiredResourceTypeAttrs = ['fileExtension'];
 }
 
 //	HERENCIA (parece correcto hacerlo así, ver https://community.risingstack.com/javascript-prototype-chain-inheritance/)
-resman.BrowserLocalStorage.prototype = Object.create(resman.Storage.prototype);
-resman.BrowserLocalStorage.prototype.constructor = resman.BrowserLocalStorage;
+resman_storage.BrowserLocalStorage.prototype = Object.create(resman_storage.Storage.prototype);
+resman_storage.BrowserLocalStorage.prototype.constructor = resman_storage.BrowserLocalStorage;
 
-resman.BrowserLocalStorage.prototype.doRetrieve = function(res, resourceType) {
+resman_storage.BrowserLocalStorage.prototype.doRetrieve = function(res, resourceType) {
 	//	xxx	la carpeta base "res" debería ser configurable...
-	return resman.utils.ajax("res" + res.path + "/" + res.name + "." + resourceType.fileExtension);
+	return resman_utils.ajax("res" + res.path + "/" + res.name + "." + resourceType.fileExtension);
 }
 
-resman.BrowserLocalStorage.prototype.doStore = function(res, resourceType, data) {
+resman_storage.BrowserLocalStorage.prototype.doStore = function(res, resourceType, data) {
 	//	Al usar el navegador abriendo el index.html directamente (FILE:///),
 	//	se usa FileSaver.js (html5), que permite generar archivos en cliente y descargarlos
 	var blob = new Blob([data], {type: "application/" + resourceType.fileExtension});
@@ -92,22 +95,22 @@ BrowserRemoteStorage
 Carga por ajax un archivo remoto, y al guardar lo sube al servidor por ajax.
 */
 
-resman.BrowserRemoteStorage = function(resourceManager, config) {
-	resman.Storage.call(this, resourceManager, config);	// INHERITED
+resman_storage.BrowserRemoteStorage = function(resourceManager, config) {
+	resman_storage.Storage.call(this, resourceManager, config);	// INHERITED
 	this.requiredResourceTypeAttrs = ['fileExtension'];
 }
 
-resman.BrowserRemoteStorage.prototype = Object.create(resman.Storage.prototype);
-resman.BrowserRemoteStorage.prototype.constructor = resman.BrowserRemoteStorage;
+resman_storage.BrowserRemoteStorage.prototype = Object.create(resman_storage.Storage.prototype);
+resman_storage.BrowserRemoteStorage.prototype.constructor = resman_storage.BrowserRemoteStorage;
 
-resman.BrowserRemoteStorage.prototype.doRetrieve = function(res, resourceType) {
+resman_storage.BrowserRemoteStorage.prototype.doRetrieve = function(res, resourceType) {
 	//	xxx	la carpeta base "res" debería ser configurable...
-	return resman.utils.ajax("res" + res.path + "/" + res.name + "." + resourceType.fileExtension);
+	return resman_utils.ajax("res" + res.path + "/" + res.name + "." + resourceType.fileExtension);
 }
 
-resman.BrowserRemoteStorage.prototype.doStore = function(res, resourceType, data) {
+resman_storage.BrowserRemoteStorage.prototype.doStore = function(res, resourceType, data) {
 	//	xxx	la carpeta base "res" debería ser configurable...
-	return resman.utils.ajaxpost("res" + res.path + "/" + res.name + "." + resourceType.fileExtension,
+	return resman_utils.ajaxpost("res" + res.path + "/" + res.name + "." + resourceType.fileExtension,
 				data,
 				"application/" + resourceType.fileExtension);
 }
@@ -125,17 +128,17 @@ xxx de momento solo usando load.image con pngs... pero debería poder usarse con
 	también sirve con load.script, para los filters
 */
 
-resman.PhaserLoaderStorage = function(resourceManager, config) {
-	resman.Storage.call(this, resourceManager, config);	// INHERITED
+resman_storage.PhaserLoaderStorage = function(resourceManager, config) {
+	resman_storage.Storage.call(this, resourceManager, config);	// INHERITED
 	//this.requiredResourceTypeAttrs = ['fileExtension'];
 	this.requiredResourceTypeAttrs = ['phaserGame', 'fileExtension'];
 	this.deferreds = {};
 }
 
-resman.PhaserLoaderStorage.prototype = Object.create(resman.Storage.prototype);
-resman.PhaserLoaderStorage.prototype.constructor = resman.PhaserLoaderStorage;
+resman_storage.PhaserLoaderStorage.prototype = Object.create(resman_storage.Storage.prototype);
+resman_storage.PhaserLoaderStorage.prototype.constructor = resman_storage.PhaserLoaderStorage;
 
-resman.PhaserLoaderStorage.prototype.doRetrieve = function(res, resourceType) {
+resman_storage.PhaserLoaderStorage.prototype.doRetrieve = function(res, resourceType) {
 	//	XXX	no funciona del todo bien... parece que aunque se estén cargando varios recursos (varias llamadas a doRetrieve),
 	//		el onFileComplete solo se ejecuta una sola vez, y deben quedar deferreds sin resolver
 	//	xxx	la carpeta base "res" debería ser configurable...
@@ -163,3 +166,5 @@ resman.PhaserLoaderStorage.prototype.doRetrieve = function(res, resourceType) {
 
 /*resman.PhaserLoaderStorage.prototype.doStore = function(res, resourceType, data) {
 }*/
+
+module.exports = resman_storage;

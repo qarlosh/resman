@@ -26,7 +26,9 @@ El name no puede tener los caracteres / ni .
 El type no puede tener el caracter /, aunque puede tener el .
 */
 
-if (!window.resman) resman = {};
+var resman_storage = require("./resman-storage");
+
+var resman = {};
 
 //	No sé si usar directamente tipos de archivo, o algo más abstracto, como por
 //	ejemplo "image", etc... o un sistema que permita las dos formas?
@@ -63,8 +65,8 @@ resman.ResourceManager = function(config) {
 	
 	//	Crear Storages por defecto
 	this.storages = {};
-	this.addStorage("BrowserLocal",		resman.BrowserLocalStorage);
-	this.addStorage("BrowserRemote",	resman.BrowserRemoteStorage);
+	this.addStorage("BrowserLocal",		resman_storage.BrowserLocalStorage);
+	this.addStorage("BrowserRemote",	resman_storage.BrowserRemoteStorage);
 }
 
 resman.ResourceManager.prototype.addStorage = function(name, storageClass) {
@@ -285,3 +287,5 @@ resman.ResourceType.prototype.saveResource = function(resourceid, obj) {
 	*/
 	return (this.onSaveResource ? this.onSaveResource : this.defaultSaveResource).call(this, resourceid, obj);
 }
+
+module.exports = resman;

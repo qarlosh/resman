@@ -1,20 +1,17 @@
-if (!window.resman) resman = {};
-
 /*
 Utilidades (Ajax...)
-
-Requiere:
-	Q
 */
 
-resman.utils = {}
+//var Q = require("Q");
+
+var resman_utils = {};
 
 
 /*	XXX
 	Estaría bien poder detectar la plataforma/entorno en que se está ejecutando, para
 	asi decidir los métodos de serialización a usar, o si es posible por ejemplo guardar...
 */
-resman.utils.getEnvironmentType = function() {
+resman_utils.getEnvironmentType = function() {
 	/*
 		Ejemplos de posibles valores a devolver:
 		"browser http"	Si es en un navegador, conectado a un servidor web por HTTP
@@ -28,12 +25,12 @@ resman.utils.getEnvironmentType = function() {
 
 
 /*
-	resman.utils.ajax
+	resman_utils.ajax
 	Llamada GET ajax asíncrona. Devuelve una promise, mediante Q
 	
 		url		URL a la que se hace la llamada
 */
-resman.utils.ajax = function(url) {
+resman_utils.ajax = function(url) {
 	var deferred = Q.defer();
 	var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
 	xhr.open('GET', url);
@@ -56,7 +53,7 @@ resman.utils.ajax = function(url) {
 	return deferred.promise;
 }
 
-resman.utils.ajaxpost = function(url, content, type) {
+resman_utils.ajaxpost = function(url, content, type) {
 	/*
 		url			a donde se envia el POST
 		content		string que se envía
@@ -98,14 +95,14 @@ resman.utils.ajaxpost = function(url, content, type) {
 /*
 	Algunos "Serializers" útiles
 */
-resman.utils.serialization = {};
+resman_utils.serialization = {};
 
 /*
 	Para la lista de objetos de un asObjList
 	Usa la propiedad "constructorId" para averiguar el constructor y ejecutar su fromJSON (deberia tenerlo)
 	El constructor se ha registrado previamente mediante initSerializable()
 */
-resman.utils.serialization.objList = {
+resman_utils.serialization.objList = {
 	
 	read: function(o) {
 		for (var i=0; i<o.length; i++) {
@@ -125,3 +122,5 @@ resman.utils.serialization.objList = {
 	}
 	
 }
+
+module.exports = resman_utils;
