@@ -26,9 +26,18 @@ El name no puede tener los caracteres / ni .
 El type no puede tener el caracter /, aunque puede tener el .
 */
 
+/* XXX Muevo arriba de todo la asignación a module.exports para resolver el
+	problema causado por la referencia al requerir resman-storage, ya que a su
+	vez requiere resman.
+	ver: https://nodejs.org/api/modules.html#modules_cycles
+*/
+var resman = {};
+module.exports = resman;
+///////////////////////////////////
+
 var resman_storage = require("./resman-storage");
 
-var resman = {};
+//var resman = {};
 
 //	No sé si usar directamente tipos de archivo, o algo más abstracto, como por
 //	ejemplo "image", etc... o un sistema que permita las dos formas?
@@ -288,4 +297,4 @@ resman.ResourceType.prototype.saveResource = function(resourceid, obj) {
 	return (this.onSaveResource ? this.onSaveResource : this.defaultSaveResource).call(this, resourceid, obj);
 }
 
-module.exports = resman;
+//module.exports = resman;
