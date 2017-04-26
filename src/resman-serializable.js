@@ -6,9 +6,9 @@ Si vale la pena tener otros formatos ya se miraría de haver con classes descend
 IMPORTANTE: Llamar a initSerializable() después de hacer asSerializable un prototype!
 */
 
-if (!window.resman) resman = {};
+var resman_serializable = {};
 
-resman.asSerializable = function() {
+resman_serializable.asSerializable = function() {
 	/*
 		Lee y escribe la información necesaria del objeto en formato JSON,
 		para serializarlo.
@@ -46,17 +46,17 @@ resman.asSerializable = function() {
 			id = shaObj.getHash("HEX");
 		}
 
-		if (!resman.asSerializable._constructors)
-			resman.asSerializable._constructors = {};
-		resman.asSerializable._constructors[id] = this.constructor;
+		if (!resman_serializable.asSerializable._constructors)
+			resman_serializable.asSerializable._constructors = {};
+		resman_serializable.asSerializable._constructors[id] = this.constructor;
 	}
 	
 	this._getConstructorById = function(id) {
 		/*
 			Devuelve un constructor registrado por su id, o undefined
 		*/
-		if (resman.asSerializable._constructors)
-			return resman.asSerializable._constructors[id];
+		if (resman_serializable.asSerializable._constructors)
+			return resman_serializable.asSerializable._constructors[id];
 		return undefined;
 	}
 
@@ -64,9 +64,9 @@ resman.asSerializable = function() {
 		/*
 			Devuelve el id de un constructor registrado, o undefined
 		*/
-		if (resman.asSerializable._constructors) {
-			for (var id in resman.asSerializable._constructors)
-				if (resman.asSerializable._constructors[id] == creator) return id;
+		if (resman_serializable.asSerializable._constructors) {
+			for (var id in resman_serializable.asSerializable._constructors)
+				if (resman_serializable.asSerializable._constructors[id] == creator) return id;
 		}
 		return undefined;
 	}
@@ -131,3 +131,5 @@ resman.asSerializable = function() {
 	}
 
 }
+
+module.exports = resman_serializable;
